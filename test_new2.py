@@ -5,7 +5,29 @@ import numpy as np
 import pandas as pd
 
 # Trainiertes Modell laden
-model = load_model('C:/Users/elesh/Desktop/University/PEiM/my_model.h5')
+# model = load_model('C:/Users/elesh/Desktop/University/PEiM/my_model.h5')
+
+import streamlit as st
+from tensorflow.keras.models import load_model
+import requests
+from tempfile import NamedTemporaryFile
+
+# The direct download URL for the Google Drive file (change it with your actual direct link)
+MODEL_URL = "https://drive.google.com/file/d/1-ErHmDNSs-9gvLhj71VJaRQY60LN9XR8/view?usp=sharing"
+
+@st.cache(allow_output_mutation=True)
+def download_model_from_url(model_url):
+    # Streamlit's cache mechanism ensures that we only download the model once.
+    with requests.get(model_url, stream=True) as r:
+        r.raise_for_status()
+        with NamedTemporaryFile(delete=False, suffix='.h5') as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
+            return f.name
+
+model_path = download_model_from_url(MODEL_URL)
+model = load_model(model_path)
+
 
 # Klassennamen basierend auf dem Training des Modells definieren
 class_names = ['neuwertig', 'mittel', 'defekt']
